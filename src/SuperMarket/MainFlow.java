@@ -15,7 +15,7 @@ public class MainFlow {
     private int customerId;
 
     public MainFlow(){
-        admins.add(new Admin("Momen Tarek","momen@gmail.com","123",true));
+        admins.add(new Admin("MomenTarek","momen@gmail.com","1234",true));
         products.add(new Product("TV",1000.0,5,new Shippable("TV",600.0)));
         products.add(new Product("Mobile.",3000.0,4,new Shippable("Mobile.",300.0)));
         products.add(new Product("Cheese",80.0,15,new Shippable("Cheese",100.0),new Expirable(LocalDate.of(2026,12,29))));
@@ -204,7 +204,7 @@ public class MainFlow {
                                 System.out.println("Enter Product Number :");
                                 String productNumberInput =Validations.inputString();
                                 productNumber=Validations.checkNumberValidation(productNumberInput);
-                                if(products.size()<=productNumber||productNumber<=0){
+                                if(products.size()<productNumber||productNumber<=0){
                                     System.out.println("\u001B[31mPlease Enter an existing number \u001B[0m \n");
                                 }
                                 else{
@@ -295,8 +295,13 @@ public class MainFlow {
                         System.out.println("--------------------------------");
                         System.out.println("Subtotal                             "+customer.getCart().getSubTotalPrice());
                         System.out.println("Shipping                             "+customer.getCart().getShippingPrice());
-                        System.out.println("Amount                             "+customer.getCart().getSubTotalPrice());
+                        System.out.println("Amount                             "+customer.getCart().getTotalPrice());
+                        customer.setBalance((customer.getBalance())-(customer.getCart().getTotalPrice()));
+                        for(Item i:customer.getCart().getItems()){
+                            i.product.setQuantity((i.product.getQuantity())-(i.getQuantitySold()));
 
+                        }
+                        customer.getCart().resetCart();
                         System.out.println("Press on any Key To go to Home");
 
                         String back=Validations.inputString();
@@ -347,45 +352,70 @@ public class MainFlow {
         System.out.println("\n \n");
         System.out.println("1-Add a Product");
         System.out.println("2-Show All Products");
-        System.out.println("3-Update a Product");
-        System.out.println("4-Delete a Product");
-        System.out.println("5-Search Product (by Id or Name)");
-        System.out.println("6-Log Out ");
+        System.out.println("3-Log Out ");
         String ans =Validations.inputString();
         switch(ans.trim()){
 
             case "1":
-                String answer;
-                do{
-                    System.out.println("1-Are you sure to add new dish\n2-To go back to previous page");
-                    answer =Validations.inputString();
-                    switch(answer.trim()){
-                        case "1":
+                System.out.println("Enter Product Name");
+                String productName=Validations.inputString();
 
-                            firstPageAdmin(admin);
-                            break;
-                        case "2":
-                            firstPageAdmin(admin);
-                            break;
-                        default :
-                            System.out.println("\u001B[31mInvalid choice\u001B[0m");
+                System.out.println("Enter Product Price");
+                String priceInput=Validations.inputString();
+                double productPrice= Validations.checkDoubleValidation(priceInput);
 
+                System.out.println("Enter Product Quantity");
 
-                    }}while(!(answer.equals("1")||answer.equals("2")));
+                String quantityInput=Validations.inputString();
+                int productQuantity=Validations.checkNumberValidation(quantityInput);
+                String shippableInput;
+
+                double productWeight;
+                while (true){
+                    System.out.println("this product is shippable ? (y/n)");
+                    shippableInput=Validations.inputString();
+                    if(shippableInput.toLowerCase().equals("y")||shippableInput.toLowerCase().equals("n")){
+                        System.out.println("Enter Product Weight");
+                        String productWeightInput=Validations.inputString();
+                        productWeight= Validations.checkDoubleValidation(productWeightInput);
+                        break;
+                    }
+                }
+                String expirableInput;
+                LocalDate expireDate;
+                while (true){
+                    System.out.println("this product is expirable ? (y/n)");
+                    expirableInput=Validations.inputString();
+                    if(shippableInput.toLowerCase().equals("y")||shippableInput.toLowerCase().equals("n")){
+                        System.out.print("Enter expiry date (yyyy-MM-dd): ");
+                        String expireDateString=Validations.inputString();
+                        expireDate=Validations.checkExpiryDate(expireDateString);
+                        break;
+                    }
+                }
+                if(expirableInput.toLowerCase().equals("y")&&shippableInput.toLowerCase().equals("y")){
+                    products.add(new Product(productName,productPrice,productQuantity,new Shippable(productName,productWeight),new Expirable(expireDate)));
+                }
+                else if(expirableInput.toLowerCase().equals("y")){
+                    products.add(new Product(productName,productPrice,productQuantity,new Expirable(expireDate)));
+
+                }
+                else if(shippableInput.toLowerCase().equals("y")){
+                    products.add(new Product(productName,productPrice,productQuantity,new Shippable(productName,productWeight)));
+                }
+                else{
+                    products.add(new Product(productName,productPrice,productQuantity));
+                }
+                System.out.println("                                                                \u001B[32mProduct Added Successfully :) \u001B[0m");
+                firstPageAdmin(admin);
                 break;
-            case "2" :
-
+            case "2":
+                showAllProductsForAdmin();
+                System.out.println("Press on any Key To go to Home");
+                String back=Validations.inputString();
+                firstPageAdmin(admin);
                 break;
             case "3" :
-
-                break;
-            case "4":
-
-                break;
-            case "5":
-
-                break;
-            case "6":
                 String x;
                 do {
                     System.out.println("1-Log out \n2-Close program\n3-Back to home page");
@@ -419,6 +449,26 @@ public class MainFlow {
         for(Product i:products) {
             System.out.println("   Product " + productId + ":");
             i.displayInfo();
+            System.out.println("*****************************************");
+            productId++;
+        }
+        System.out.println("\n");
+    }
+    private void showAllProductsForAdmin(){
+        int productId=1;
+        System.out.println("*****************************************");
+        for(Product i:products) {
+            System.out.println("   Product " + productId + ":");
+            i.displayInfo();
+            System.out.println("            Product Price :"+i.getQuantity());
+            if(i.isShippable()){
+                System.out.println("            Product Weight :"+i.getShippable().getWeight());
+
+            }
+            if(i.isExpirable()){
+                System.out.println("            Product Expired :"+i.getExpirable().isExpired());
+                System.out.println("            Product Expiry Date :"+i.getExpirable().getExpirtionDate());
+            }
             System.out.println("*****************************************");
             productId++;
         }

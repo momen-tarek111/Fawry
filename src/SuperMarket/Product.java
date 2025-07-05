@@ -57,4 +57,7 @@ public class Product {
         System.out.println("            Product Name :"+getName());
         System.out.println("            Product Price :"+getPrice());
     }
+    public void setQuantity(int quantity){
+        this.quantity=quantity;
+    }
 }

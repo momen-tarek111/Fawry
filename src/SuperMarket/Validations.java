@@ -1,5 +1,10 @@
 package SuperMarket;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
+import java.util.Date;
 import java.util.Scanner;
 
 public class Validations {
@@ -64,5 +69,24 @@ public class Validations {
         }
         return choice;
 
+    }
+    public static LocalDate checkExpiryDate(String Date){
+        LocalDate expiryDate;
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        while(true){
+            try{
+                expiryDate = LocalDate.parse(Date.trim(), format);
+                if (expiryDate.isBefore(LocalDate.now())) {
+                    System.out.println("Expiry date cannot be in the past. Please try again.");
+                    Date=Validations.inputString();
+                } else {
+                    break;
+                }
+            }catch (DateTimeParseException e) {
+                System.out.println("Invalid date format.Please use yyyy-MM-dd.");
+                Date=Validations.inputString();
+            }
+        }
+        return expiryDate;
     }
 }
